@@ -1,0 +1,26 @@
+2024-11-12 14:52:47,424 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2024-11-12 14:52:47,425 - main - INFO - Starting bot...
+2024-11-12 14:52:47,426 - discord.client - INFO - logging in using static token
+2024-11-12 14:52:48,898 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: cfa37eb581b6ada1d748877f11ce59bf).
+2024-11-12 14:52:50,906 - main - INFO - Logged in as MyFirstBot
+2024-11-12 14:52:50,906 - main - INFO - Bot ID: 1221651405966807112
+2024-11-12 14:52:50,906 - main - INFO - Discord.py Version: 2.4.0
+2024-11-12 14:52:51,783 - main - INFO - Loading cogs from directory: C:\Users\Sun\Desktop\Workspace\Discord_Bot_Initializer\Discord_Bot_Initializer\src\main\resources\static\BotLauncher\_internal\cogs
+2024-11-12 14:52:51,784 - main - INFO - Found cog files: ['common.py', 'forbidden.py', 'search.py', 'voice.py']
+2024-11-12 14:52:51,784 - main - INFO - Loading cog in frozen environment: common.py
+2024-11-12 14:52:51,784 - main - INFO - Attempting to load cog from: C:\Users\Sun\Desktop\Workspace\Discord_Bot_Initializer\Discord_Bot_Initializer\src\main\resources\static\BotLauncher\_internal\cogs\common.py
+2024-11-12 14:52:51,805 - main - INFO - Successfully loaded module: cogs.common
+2024-11-12 14:52:51,806 - main - INFO - Successfully loaded cog: Common from common.py
+2024-11-12 14:52:51,806 - main - INFO - Loading cog in frozen environment: forbidden.py
+2024-11-12 14:52:51,806 - main - INFO - Attempting to load cog from: C:\Users\Sun\Desktop\Workspace\Discord_Bot_Initializer\Discord_Bot_Initializer\src\main\resources\static\BotLauncher\_internal\cogs\forbidden.py
+2024-11-12 14:52:51,830 - main - INFO - Successfully loaded module: cogs.forbidden
+2024-11-12 14:52:51,830 - main - INFO - Successfully loaded cog: Forbiddens from forbidden.py
+2024-11-12 14:52:51,830 - main - INFO - Loading cog in frozen environment: search.py
+2024-11-12 14:52:51,831 - main - INFO - Attempting to load cog from: C:\Users\Sun\Desktop\Workspace\Discord_Bot_Initializer\Discord_Bot_Initializer\src\main\resources\static\BotLauncher\_internal\cogs\search.py
+2024-11-12 14:52:51,958 - main - INFO - Successfully loaded module: cogs.search
+2024-11-12 14:52:51,958 - main - INFO - Successfully loaded cog: Search from search.py
+2024-11-12 14:52:51,958 - main - INFO - Loading cog in frozen environment: voice.py
+2024-11-12 14:52:51,959 - main - INFO - Attempting to load cog from: C:\Users\Sun\Desktop\Workspace\Discord_Bot_Initializer\Discord_Bot_Initializer\src\main\resources\static\BotLauncher\_internal\cogs\voice.py
+2024-11-12 14:52:51,970 - main - INFO - Successfully loaded module: cogs.voice
+2024-11-12 14:52:51,970 - main - INFO - Successfully loaded cog: Voice from voice.py
+2024-11-12 14:52:52,226 - main - INFO - Synced 0 command(s)

@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: discord-bot-initializer
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+app:
+  cogs:
+    source-path: static/bot/cogs
+    dest-path: static/BotLauncher/_internal/cogs
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    Grad_Project.Discord_Bot_Initializer.controller: DEBUG

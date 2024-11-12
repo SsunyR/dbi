@@ -1,0 +1,183 @@
+<!-- selector.mustache -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Discord Bot Cogs Selector</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .file-list {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+        .file-item:hover {
+            background-color: #f0f0f0;
+        }
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        .description {
+            margin-left: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+        .button:hover {
+            background-color: #45a049;
+            transform: translateY(-1px);
+        }
+        .button:disabled {
+            background-color: #cccccc;
+            cursor: wait;
+            transform: none;
+        }
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Discord Bot Cogs Selector</h1>
+    <p>Select the cogs modules you want to include in your Discord bot:</p>
+
+    <div class="file-list">
+        {{#cogsFiles}}
+            <div class="file-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="{{fileName}}" name="cogsFiles" value="{{fileName}}">
+                    <label for="{{fileName}}">{{fileName}}</label>
+                </div>
+                <span class="description">{{description}}</span>
+            </div>
+        {{/cogsFiles}}
+    </div>
+
+    <button id="processButton" class="button" onclick="processAndDownload()">
+        Process and Download
+        <span id="loadingSpinner" class="loading-spinner" style="display: none;"></span>
+    </button>
+    <div id="errorMessage" class="message error-message"></div>
+</div>
+
+<script>
+    function processAndDownload() {
+        const button = document.getElementById('processButton');
+        const spinner = document.getElementById('loadingSpinner');
+        const selectedFiles = Array.from(document.querySelectorAll('input[name="cogsFiles"]:checked'))
+                .map(checkbox => checkbox.value);
+        const errorMessage = document.getElementById('errorMessage');
+
+        errorMessage.style.display = 'none';
+
+        if (selectedFiles.length === 0) {
+            errorMessage.textContent = 'Please select at least one file';
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 3000);
+            return;
+        }
+
+        // Disable button and show loading state
+        button.disabled = true;
+        button.textContent = 'Processing...';
+        spinner.style.display = 'inline-block';
+
+        fetch('/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(selectedFiles)
+        })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'BotLauncher.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    // Reset checkboxes
+                    document.querySelectorAll('input[name="cogsFiles"]')
+                            .forEach(checkbox => checkbox.checked = false);
+                })
+                .catch(error => {
+                    errorMessage.textContent = 'Error processing files. Please try again.';
+                    errorMessage.style.display = 'block';
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    // Reset button state
+                    button.disabled = false;
+                    button.textContent = 'Process and Download';
+                    spinner.style.display = 'none';
+                });
+    }
+</script>
+</body>
+</html>
