@@ -3,7 +3,7 @@ spring:
     name: discord-bot-initializer
 
 server:
-  port: 8080
+  port: 3030
   error:
     include-message: always
     include-binding-errors: always
