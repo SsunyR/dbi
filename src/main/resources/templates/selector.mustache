@@ -1,80 +1,15 @@
-<!-- selector.mustache -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Discord Bot Cogs Selector</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Bot Initializr</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            font-family: Arial, sans-serif;
+        .file-item-transition {
+            transition: all 0.2s ease-in-out;
         }
-        .file-list {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            background-color: #f9f9f9;
-        }
-        .file-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.2s;
-        }
-        .file-item:hover {
-            background-color: #f0f0f0;
-        }
-        .file-item:last-child {
-            border-bottom: none;
-        }
-        .description {
-            margin-left: 20px;
-            color: #666;
-            font-size: 0.9em;
-        }
-        .message {
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
-            display: none;
-        }
-        .error-message {
-            background-color: #ffebee;
-            color: #c62828;
-            border: 1px solid #ffcdd2;
-        }
-        .button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            min-width: 200px;
-        }
-        .button:hover {
-            background-color: #45a049;
-            transform: translateY(-1px);
-        }
-        .button:disabled {
-            background-color: #cccccc;
-            cursor: wait;
-            transform: none;
-        }
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-        }
+
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -82,102 +17,143 @@
             border: 3px solid rgba(255,255,255,.3);
             border-radius: 50%;
             border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-left: 8px;
+            animation: spin 1s linear infinite;
         }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .checkbox-custom {
+            @apply w-5 h-5 text-green-600 border-gray-300 rounded
+            focus:ring-green-500 cursor-pointer transition-all duration-200;
+        }
+
+        .button-primary {
+            @apply bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6
+            rounded-lg transition duration-200 ease-in-out transform hover:-translate-y-1
+            focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50
+            disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none;
+        }
     </style>
 </head>
-<body>
-<div class="container">
-    <h1>Discord Bot Cogs Selector</h1>
-    <p>Select the cogs modules you want to include in your Discord bot:</p>
+<body class="bg-gray-50">
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+    <header class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Discord Bot Initializr</h1>
+        <p class="text-gray-600">Select the features you want to include in your Discord bot</p>
+    </header>
 
-    <div class="file-list">
-        {{#cogsFiles}}
-            <div class="file-item">
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="{{fileName}}" name="cogsFiles" value="{{fileName}}">
-                    <label for="{{fileName}}">{{fileName}}</label>
-                </div>
-                <span class="description">{{description}}</span>
+    <main>
+        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <div class="space-y-2">
+                {{#cogsFileNames}}
+                    <div class="file-item-transition hover:bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center space-x-3 cursor-pointer w-full">
+                                <input type="checkbox"
+                                       class="checkbox-custom"
+                                       id="{{.}}"
+                                       name="cogsFiles"
+                                       value="{{.}}">
+                                <div class="flex flex-col flex-grow">
+                                    <span class="text-gray-800 font-medium">{{.}}</span>
+                                    <span class="text-sm text-gray-500">Python module for {{.}}</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                {{/cogsFileNames}}
             </div>
-        {{/cogsFiles}}
-    </div>
+        </div>
 
-    <button id="processButton" class="button" onclick="processAndDownload()">
-        Process and Download
-        <span id="loadingSpinner" class="loading-spinner" style="display: none;"></span>
-    </button>
-    <div id="errorMessage" class="message error-message"></div>
+        <div class="flex flex-col items-center space-y-4">
+            <button id="processButton"
+                    class="button-primary flex items-center justify-center min-w-[200px]"
+                    onclick="processSelectedFiles()">
+                <span>Process and Download</span>
+                <span id="loadingSpinner" class="loading-spinner ml-2 hidden"></span>
+            </button>
+
+            <div id="errorMessage"
+                 class="hidden w-full p-4 rounded-lg bg-red-50 text-red-700 border border-red-200"
+                 role="alert">
+            </div>
+        </div>
+    </main>
 </div>
 
 <script>
-    function processAndDownload() {
+    async function processSelectedFiles() {
         const button = document.getElementById('processButton');
         const spinner = document.getElementById('loadingSpinner');
-        const selectedFiles = Array.from(document.querySelectorAll('input[name="cogsFiles"]:checked'))
-                .map(checkbox => checkbox.value);
         const errorMessage = document.getElementById('errorMessage');
 
-        errorMessage.style.display = 'none';
+        // Get selected files
+        const selectedFiles = Array.from(document.querySelectorAll('input[name="cogsFiles"]:checked'))
+                .map(checkbox => checkbox.value);
 
         if (selectedFiles.length === 0) {
-            errorMessage.textContent = 'Please select at least one file';
-            errorMessage.style.display = 'block';
-            setTimeout(() => {
-                errorMessage.style.display = 'none';
-            }, 3000);
+            showError('Please select at least one cogs file');
             return;
         }
 
-        // Disable button and show loading state
-        button.disabled = true;
-        button.textContent = 'Processing...';
-        spinner.style.display = 'inline-block';
+        try {
+            // Disable button and show loading state
+            button.disabled = true;
+            spinner.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
 
-        fetch('/process', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(selectedFiles)
-        })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.blob();
-                })
-                .then(blob => {
-                    // Create download link
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'BotLauncher.zip';
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
+            const response = await fetch('/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ selectedFiles })
+            });
 
-                    // Reset checkboxes
-                    document.querySelectorAll('input[name="cogsFiles"]')
-                            .forEach(checkbox => checkbox.checked = false);
-                })
-                .catch(error => {
-                    errorMessage.textContent = 'Error processing files. Please try again.';
-                    errorMessage.style.display = 'block';
-                    console.error('Error:', error);
-                })
-                .finally(() => {
-                    // Reset button state
-                    button.disabled = false;
-                    button.textContent = 'Process and Download';
-                    spinner.style.display = 'none';
-                });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to process files');
+            }
+
+            // Create a blob from the response and trigger download
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'BotLauncher.zip';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            showError(error.message);
+        } finally {
+            // Reset button state
+            button.disabled = false;
+            spinner.classList.add('hidden');
+        }
     }
+
+    function showError(message) {
+        const errorElement = document.getElementById('errorMessage');
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
+        setTimeout(() => {
+            errorElement.classList.add('hidden');
+        }, 5000);
+    }
+
+    // Add keyboard support for checkboxes
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                checkbox.checked = !checkbox.checked;
+            }
+        });
+    });
 </script>
 </body>
 </html>

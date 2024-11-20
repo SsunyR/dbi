@@ -1,76 +1,58 @@
-// CogsController.java
 package Grad_Project.Discord_Bot_Initializer.controller;
 
-import Grad_Project.Discord_Bot_Initializer.model.CogsFile;
+import Grad_Project.Discord_Bot_Initializer.dto.CogsSelectionRequest;
+import Grad_Project.Discord_Bot_Initializer.dto.CogsSelectionResponse;
+import Grad_Project.Discord_Bot_Initializer.exception.FileProcessingException;
 import Grad_Project.Discord_Bot_Initializer.service.CogsProcessorService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
 public class CogsController {
-
-    @Value("classpath:static/bot/cogs/*.py")
-    private Resource[] cogsResources;
-
+    private static final Logger logger = LoggerFactory.getLogger(CogsController.class);
     private final CogsProcessorService cogsProcessorService;
 
     @GetMapping("/")
     public String showCogsSelector(Model model) {
-        List<CogsFile> cogsFiles = Arrays.stream(cogsResources)
-                .map(resource -> {
-                    try {
-                        String fileName = resource.getFilename();
-                        if (fileName != null) {
-                            return new CogsFile(fileName.substring(0, fileName.lastIndexOf('.')));
-                        }
-                        return null;
-                    } catch (Exception e) {
-                        throw new RuntimeException("Error reading cogs files", e);
-                    }
-                })
-                .filter(file -> file != null)
-                .collect(Collectors.toList());
-
-        model.addAttribute("cogsFiles", cogsFiles);
-        return "selector";
+        try {
+            List<String> cogsFileNames = cogsProcessorService.getAvailableCogsFiles();
+            model.addAttribute("cogsFileNames", cogsFileNames);
+            return "selector";
+        } catch (Exception e) {
+            logger.error("Failed to load Cogs selector", e);
+            throw new FileProcessingException("Failed to load Cogs files", e);
+        }
     }
 
-    @PostMapping("/process")
-    public ResponseEntity<Resource> processAndDownload(@RequestBody List<String> selectedFiles) {
+    @PostMapping("/download")
+    public ResponseEntity<Resource> processAndDownload(
+            @Validated @RequestBody CogsSelectionRequest request) {
         try {
-            cogsProcessorService.cleanupFiles();
-
-            List<String> filesWithExtension = selectedFiles.stream()
-                    .map(file -> file + ".py")
-                    .collect(Collectors.toList());
-
-            // Process files and create zip
-            cogsProcessorService.copySelectedFiles(filesWithExtension);
-            Path zipFile = cogsProcessorService.createBotLauncherZip();
-
-            // Prepare download
-            Resource resource = new UrlResource(zipFile.toUri());
+            CogsSelectionResponse response = cogsProcessorService.processSelectedFiles(request);
 
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"BotLauncher.zip\"")
-                    .body(resource);
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + response.getFileName() + "\"")
+                    .header(HttpHeaders.CONTENT_LENGTH,
+                            String.valueOf(response.getContent().length))
+                    .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                    .body(response.getResource());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            logger.error("Error processing files for download", e);
+            throw new FileProcessingException("Failed to process selected files", e);
         }
     }
 }

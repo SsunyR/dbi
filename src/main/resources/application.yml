@@ -8,10 +8,7 @@ server:
     include-message: always
     include-binding-errors: always
 
-app:
-  cogs:
-    source-path: static/bot/cogs
-    dest-path: static/BotLauncher/_internal/cogs
+
 
 logging:
   level:
