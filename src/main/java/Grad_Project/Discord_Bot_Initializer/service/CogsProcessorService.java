@@ -27,8 +27,8 @@ public class CogsProcessorService {
 
     public CogsProcessorService(
             ResourceLoader resourceLoader,
-            @Value("${cogs.files.path:/bot/cogs/}") String cogsPath,
-            @Value("${botlauncher.files.path:/BotLauncher/}") String botLauncherPath) {
+            @Value("${cogs.files.path:classpath:/static/bot/cogs/}") String cogsPath,
+            @Value("${botlauncher.files.path:classpath:/static/BotLauncher/}") String botLauncherPath) {
         this.resourceLoader = resourceLoader;
         this.cogsPath = cogsPath;
         this.botLauncherPath = botLauncherPath;
@@ -36,7 +36,7 @@ public class CogsProcessorService {
 
     public List<String> getAvailableCogsFiles() {
         try {
-            Resource cogsResource = resourceLoader.getResource("classpath:static/" + cogsPath);
+            Resource cogsResource = resourceLoader.getResource(cogsPath);
             File cogsDir = cogsResource.getFile();
 
             return Files.list(cogsDir.toPath())
@@ -67,8 +67,8 @@ public class CogsProcessorService {
 
     private byte[] createBotLauncherZip(List<String> selectedFiles) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Resource botLauncherResource = resourceLoader.getResource("classpath:static/" + botLauncherPath);
-        Resource cogsResource = resourceLoader.getResource("classpath:static/" + cogsPath);
+        Resource botLauncherResource = resourceLoader.getResource(botLauncherPath);
+        Resource cogsResource = resourceLoader.getResource(cogsPath);
 
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
             // Add BotLauncher files

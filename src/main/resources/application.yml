@@ -4,6 +4,9 @@ spring:
   mustache:
     servlet:
       cache: false
+  web:
+    resources:
+      add-mappings: true
 
 server:
   port: 3030
