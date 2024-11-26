@@ -67,8 +67,8 @@ public class CogsProcessorService {
 
     private byte[] createBotLauncherZip(List<String> selectedFiles) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Resource botLauncherResource = resourceLoader.getResource("classpath:" + botLauncherPath);
-        Resource cogsResource = resourceLoader.getResource("classpath:" + cogsPath);
+        Resource botLauncherResource = resourceLoader.getResource("classpath:static/" + botLauncherPath);
+        Resource cogsResource = resourceLoader.getResource("classpath:static/" + cogsPath);
 
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
             // Add BotLauncher files
