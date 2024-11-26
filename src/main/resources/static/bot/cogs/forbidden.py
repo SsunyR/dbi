@@ -54,8 +54,7 @@ class Forbiddens(commands.Cog):
     @commands.command()
     async def 금지어(self, ctx: commands.Context):
         """
-        금지어 목록을 보여줍니다.
-        사용법: !금지어
+        - 금지어 목록을 보여줍니다. (!금지어)
         """
         if not self.forbiddens:
             await ctx.send("등록된 금지어가 없습니다.")
@@ -73,8 +72,7 @@ class Forbiddens(commands.Cog):
     @commands.command()
     async def 금지어추가(self, ctx: commands.Context, forbidden: str):
         """
-        금지어를 추가합니다.
-        사용법: !금지어추가 [금지어]
+        - 금지어를 추가합니다. (!금지어추가 [금지어])
         """
         if forbidden in self.forbiddens:
             await ctx.send(f"{forbidden}은(는) 이미 금지어 목록에 있습니다.")
@@ -92,8 +90,7 @@ class Forbiddens(commands.Cog):
     @commands.command()
     async def 금지어삭제(self, ctx: commands.Context, forbidden: str):
         """
-        금지어를 삭제합니다.
-        사용법: !금지어삭제 [금지어]
+        - 금지어를 삭제합니다. (!금지어삭제 [금지어])
         """
         if forbidden not in self.forbiddens:
             await ctx.send(f"{forbidden}은(는) 금지어 목록에 없습니다.")

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디스코드 봇 토큰 발급 가이드</title>
+    <link rel="stylesheet" href="/css/token-guide-styles.css">
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/4.2.0/mustache.min.js"></script>
+<div class="container">
+    <h1>디스코드 봇 토큰 발급 가이드</h1>
+
+    <div id="steps-container">
+        {{#steps}}
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">{{number}}</div>
+                    <div class="step-title">{{title}}</div>
+                </div>
+                <div class="step-content">
+                    {{{content}}}
+                    <img src="/api/placeholder/600/300" alt="{{imageAlt}}" class="step-image">
+                </div>
+            </div>
+        {{/steps}}
+    </div>
+</div>
+
+<script src="/js/token-guide-script.js"></script>
+</body>
+</html>

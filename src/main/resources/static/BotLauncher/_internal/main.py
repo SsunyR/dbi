@@ -157,15 +157,12 @@ def run():
             await ctx.send(f": {str(error)}")
         logger.error(f"Command error: {str(error)}")
 
-    @bot.command()
-    async def ping(ctx):
-        """Check the bot's latency"""
-        latency = round(bot.latency * 1000)
-        await ctx.send(f"Pong! Latency: {latency}ms")
 
     @bot.command()
     async def 핑(ctx):
-        """한국어 ping 명령어"""
+        """
+        - 봇의 지연 시간을 확인합니다.
+        """
         latency = round(bot.latency * 1000)
         await ctx.send(f"퐁! 지연 시간: {latency}ms")
 

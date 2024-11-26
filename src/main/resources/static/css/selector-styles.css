@@ -1,0 +1,234 @@
+:root {
+    --discord-blue: #5865F2;
+    --discord-hover: #4752C4;
+    --discord-dark: #36393f;
+    --discord-darker: #2f3136;
+    --discord-light: #dcddde;
+    --discord-lighter: #f2f3f5;
+    --discord-success: #3ba55c;
+    --discord-danger: #ed4245;
+    --blurple-gradient: linear-gradient(45deg, #5865F2, #7289da);
+}
+
+body {
+    background-color: var(--discord-dark) !important;
+    color: var(--discord-light) !important;
+    min-height: 100vh !important;
+}
+
+/* 향상된 타이틀 스타일 */
+.title-container {
+    position: relative !important;
+    padding: 2rem 0 !important;
+}
+
+.title-container h1 {
+    font-size: 3.5rem !important;
+    letter-spacing: -1px !important;
+    text-shadow: 0 0 40px rgba(88, 101, 242, 0.4) !important;
+}
+
+.title-container::before,
+.title-container::after {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(88, 101, 242, 0.2) 0%, transparent 70%);
+    animation: pulse 3s infinite;
+}
+
+.title-container::before {
+    top: 0;
+    left: 20%;
+}
+
+.title-container::after {
+    bottom: 0;
+    right: 20%;
+}
+
+/* 메인 컨테이너 스타일링 */
+.main-container {
+    background-color: rgba(47, 49, 54, 0.6) !important;
+    border-radius: 1rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+    backdrop-filter: blur(10px) !important;
+    transition: all 0.3s ease-in-out !important;
+    max-height: 600px !important;
+    overflow-y: auto !important;
+}
+
+/* 스크롤바 스타일링 */
+.main-container::-webkit-scrollbar {
+    width: 8px !important;
+}
+
+.main-container::-webkit-scrollbar-track {
+    background: rgba(47, 49, 54, 0.3) !important;
+    border-radius: 4px !important;
+}
+
+.main-container::-webkit-scrollbar-thumb {
+    background: var(--discord-blue) !important;
+    border-radius: 4px !important;
+}
+
+.main-container::-webkit-scrollbar-thumb:hover {
+    background: var(--discord-hover) !important;
+}
+
+.main-container:hover {
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 파일 아이템 스타일링 */
+.file-item-transition {
+    background-color: rgba(88, 101, 242, 0.1) !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform-origin: center !important;
+}
+
+.file-item-transition:hover {
+    background-color: rgba(88, 101, 242, 0.2) !important;
+    transform: translateX(8px) !important;
+    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.2) !important;
+}
+
+/* 아이템 이동 애니메이션 */
+.item-moving {
+    animation: moveItem 0.5s ease-in-out;
+}
+
+@keyframes moveItem {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.4; }
+}
+
+/* 체크박스 커스텀 스타일링 */
+input[type="checkbox"].checkbox-custom {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    position: relative !important;
+    border: 2px solid var(--discord-blue) !important;
+    border-radius: 6px !important;
+    background-color: transparent !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+input[type="checkbox"].checkbox-custom:checked {
+    background-color: var(--discord-blue) !important;
+    border-color: var(--discord-blue) !important;
+    box-shadow: 0 0 12px rgba(88, 101, 242, 0.5) !important;
+}
+
+input[type="checkbox"].checkbox-custom:focus {
+    box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.25) !important;
+}
+
+/* 버튼 스타일링 강화 */
+.button-primary {
+    background: var(--blurple-gradient) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 0.875rem 2rem !important;
+    border-radius: 0.75rem !important;
+    border: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 14px rgba(88, 101, 242, 0.3) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.button-primary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent) !important;
+    transform: translateX(-100%) !important;
+    transition: 0.5s !important;
+}
+
+.button-primary:hover:not(:disabled) {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4) !important;
+}
+
+.button-primary:hover::before {
+    transform: translateX(100%) !important;
+}
+
+.button-primary:disabled {
+    background: #4f545c !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+}
+
+/* 로딩 스피너 개선 */
+.loading-spinner {
+    display: inline-block !important;
+    width: 24px !important;
+    height: 24px !important;
+    border: 3px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 50% !important;
+    border-top-color: white !important;
+    animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 에러 메시지 스타일 개선 */
+#errorMessage {
+    background-color: rgba(237, 66, 69, 0.1) !important;
+    border: 1px solid rgba(237, 66, 69, 0.2) !important;
+    color: #ed4245 !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 12px rgba(237, 66, 69, 0.1) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* 파일 이름과 설명 스타일 */
+.file-name {
+    font-weight: 600 !important;
+    color: var(--discord-lighter) !important;
+    font-size: 1.1rem !important;
+}
+
+.file-description {
+    color: var(--discord-light) !important;
+    opacity: 0.8 !important;
+}
+
+/* 애니메이션 */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(88, 101, 242, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(88, 101, 242, 0.4); }
+    100% { box-shadow: 0 0 5px rgba(88, 101, 242, 0.2); }
+}
