@@ -7,6 +7,7 @@ import Grad_Project.Discord_Bot_Initializer.service.CogsProcessorService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -42,14 +43,16 @@ public class CogsController {
         try {
             CogsSelectionResponse response = cogsProcessorService.processSelectedFiles(request);
 
+            // ByteArrayResource 생성
+            ByteArrayResource resource = new ByteArrayResource(response.getContent());
+
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .header(HttpHeaders.CONTENT_DISPOSITION,
                             "attachment; filename=\"" + response.getFileName() + "\"")
                     .header(HttpHeaders.CONTENT_LENGTH,
                             String.valueOf(response.getContent().length))
-                    .header(HttpHeaders.ACCEPT_RANGES, "bytes")
-                    .body(response.getResource());
+                    .body(resource);
         } catch (Exception e) {
             logger.error("Error processing files for download", e);
             throw new FileProcessingException("Failed to process selected files", e);

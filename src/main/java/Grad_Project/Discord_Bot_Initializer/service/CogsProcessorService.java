@@ -8,13 +8,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 @Service
@@ -22,102 +25,89 @@ import java.util.zip.ZipOutputStream;
 public class CogsProcessorService {
     private static final int BUFFER_SIZE = 4096;
     private final ResourceLoader resourceLoader;
+    private final ResourcePatternResolver resourcePatternResolver;
     private final String cogsPath;
-    private final String botLauncherPath;
+    private final String botLauncherZipPath;
 
     public CogsProcessorService(
             ResourceLoader resourceLoader,
+            ResourcePatternResolver resourcePatternResolver,
             @Value("${cogs.files.path:classpath:/static/bot/cogs/}") String cogsPath,
-            @Value("${botlauncher.files.path:classpath:/static/BotLauncher/}") String botLauncherPath) {
+            @Value("${botlauncher.zip.path:classpath:/static/BotLauncher.zip}") String botLauncherZipPath) {
         this.resourceLoader = resourceLoader;
+        this.resourcePatternResolver = resourcePatternResolver;
         this.cogsPath = cogsPath;
-        this.botLauncherPath = botLauncherPath;
+        this.botLauncherZipPath = botLauncherZipPath;
     }
 
     public List<String> getAvailableCogsFiles() {
         try {
-            Resource cogsResource = resourceLoader.getResource(cogsPath);
-            File cogsDir = cogsResource.getFile();
-
-            return Files.list(cogsDir.toPath())
-                    .filter(path -> path.toString().endsWith(".py"))
-                    .map(path -> path.getFileName().toString())
+            Resource[] resources = resourcePatternResolver.getResources(cogsPath + "*.py");
+            return Arrays.stream(resources)
+                    .map(Resource::getFilename)
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            log.error("Failed to read cogs directory", e);
+            log.error("Failed to read cogs files", e);
             throw new FileProcessingException("Unable to read available cogs files", e);
         }
     }
 
     public CogsSelectionResponse processSelectedFiles(CogsSelectionRequest request) {
         try {
-            byte[] zipContent = createBotLauncherZip(request.getSelectedFiles());
-            Resource resource = new ByteArrayResource(zipContent);
-
+            byte[] zipContent = addCogsToExistingZip(request.getSelectedFiles());
             return CogsSelectionResponse.builder()
                     .fileName("BotLauncher.zip")
                     .content(zipContent)
-                    .resource(resource)
                     .build();
         } catch (IOException e) {
             log.error("Failed to process selected files", e);
-            throw new FileProcessingException("Error creating zip file", e);
+            throw new FileProcessingException("Error updating zip file", e);
         }
     }
 
-    private byte[] createBotLauncherZip(List<String> selectedFiles) throws IOException {
+    private byte[] addCogsToExistingZip(List<String> selectedFiles) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Resource botLauncherResource = resourceLoader.getResource(botLauncherPath);
-        Resource cogsResource = resourceLoader.getResource(cogsPath);
 
-        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
-            // Add BotLauncher files
-            addDirectoryToZip(botLauncherResource.getFile(), "BotLauncher", zos);
+        // 기존 BotLauncher.zip 읽기
+        Resource botLauncherZipResource = resourceLoader.getResource(botLauncherZipPath);
+        try (
+                ZipInputStream zis = new ZipInputStream(botLauncherZipResource.getInputStream());
+                ZipOutputStream zos = new ZipOutputStream(baos)
+        ) {
+            ZipEntry entry;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int len;
 
-            // Add selected cogs files
+            // 기존 ZIP 엔트리 복사
+            while ((entry = zis.getNextEntry()) != null) {
+                String entryName = entry.getName();
+                zos.putNextEntry(new ZipEntry(entryName));
+                while ((len = zis.read(buffer)) > 0) {
+                    zos.write(buffer, 0, len);
+                }
+                zos.closeEntry();
+                zis.closeEntry();
+            }
+
+            // 선택한 cogs 파일 추가
             for (String fileName : selectedFiles) {
-                addCogFileToZip(cogsResource.getFile().toPath(), fileName, zos);
+                Resource cogResource = resourceLoader.getResource(cogsPath + fileName);
+                if (cogResource.exists() && cogResource.isReadable()) {
+                    try (InputStream in = cogResource.getInputStream()) {
+                        String zipPath = "_internal/cogs/" + fileName; // ZIP 내부 경로
+                        ZipEntry newEntry = new ZipEntry(zipPath);
+                        zos.putNextEntry(newEntry);
+                        while ((len = in.read(buffer)) > 0) {
+                            zos.write(buffer, 0, len);
+                        }
+                        zos.closeEntry();
+                    }
+                } else {
+                    log.warn("Cog file not found or unreadable: {}", fileName);
+                }
             }
         }
 
         return baos.toByteArray();
-    }
-
-    private void addDirectoryToZip(File sourceDir, String zipPath, ZipOutputStream zos) throws IOException {
-        Path sourcePath = sourceDir.toPath();
-        Files.walk(sourcePath)
-                .filter(path -> !Files.isDirectory(path))
-                .forEach(path -> {
-                    try {
-                        String relativePath = zipPath + "/" + sourcePath.relativize(path);
-                        addFileToZip(path, relativePath, zos);
-                    } catch (IOException e) {
-                        throw new FileProcessingException("Failed to add file to zip: " + path, e);
-                    }
-                });
-    }
-
-    private void addCogFileToZip(Path cogsDir, String fileName, ZipOutputStream zos) throws IOException {
-        Path cogFile = cogsDir.resolve(fileName);
-        if (Files.exists(cogFile)) {
-            addFileToZip(cogFile, "BotLauncher/_internal/cogs/" + fileName, zos);
-        } else {
-            log.warn("Cog file not found: {}", fileName);
-        }
-    }
-
-    private void addFileToZip(Path file, String zipPath, ZipOutputStream zos) throws IOException {
-        ZipEntry zipEntry = new ZipEntry(zipPath);
-        zos.putNextEntry(zipEntry);
-
-        byte[] buffer = new byte[BUFFER_SIZE];
-        try (InputStream in = Files.newInputStream(file)) {
-            int len;
-            while ((len = in.read(buffer)) > 0) {
-                zos.write(buffer, 0, len);
-            }
-        }
-
-        zos.closeEntry();
     }
 }
