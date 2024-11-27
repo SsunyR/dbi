@@ -9,7 +9,7 @@ spring:
       add-mappings: true
 
 server:
-  port: 3030
+  port: 8080
   error:
     include-message: always
     include-binding-errors: always
